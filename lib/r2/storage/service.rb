@@ -2,12 +2,12 @@
 
 require 'aws-sdk-s3'
 
-require_relative 'result'
-
 module R2
   class Storage
     class Service
-      def initialize(config:)
+      def initialize(config)
+        @config = config
+
         @s3 = Aws::S3::Client.new(
           access_key_id: config.access_key_id,
           secret_access_key: config.secret_access_key,
@@ -19,53 +19,33 @@ module R2
         )
       end
 
-      def put(bucket:, key:, body:, prefix: nil)
-        object_key = build_key(prefix, key)
-
+      def put(key, body, params = {})
         @s3.put_object(
-          bucket: bucket,
-          key: object_key,
+          bucket: params[:bucket],
+          key: build_key(params[:prefix], key),
           body: body,
-          size: body.bytesize,
         )
-
-        Result.new(key: object_key, size: body.bytesize)
       end
 
-      def get(bucket:, key:, prefix: nil)
-        object_key = build_key(prefix, key)
-
-        resp = @s3.get_object(
-          bucket: bucket,
-          key: object_key,
+      def get(key, params = {})
+        @s3.get_object(
+          bucket: params[:bucket],
+          key: build_key(params[:prefix], key),
         )
-
-        Result.new(key: object_key, content: resp.body.read, size: resp.content_length)
       end
 
-      def delete(bucket:, key:, prefix: nil)
-        object_key = build_key(prefix, key)
-
+      def delete(key, params = {})
         @s3.delete_object(
-          bucket: bucket,
-          key: object_key,
+          bucket: params[:bucket],
+          key: build_key(params[:prefix], key),
         )
-
-        Result.new(key: object_key)
       end
 
-      def list(bucket:, prefix: nil)
-        resp = @s3.list_objects_v2(
-          bucket: bucket,
-          prefix: prefix,
+      def list(params = {})
+        @s3.list_objects_v2(
+          bucket: params[:bucket],
+          prefix: params[:prefix],
         )
-
-        resp.contents.map do |object|
-          Result.new(
-            key: object.key,
-            size: object.size,
-          )
-        end
       end
 
       private
