@@ -15,5 +15,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rexml'
   spec.add_dependency 'thor'
 
-  spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'minitest'
 end

@@ -1,0 +1,10 @@
+The quick brown fox jumps over the lazy dog.
+
+This is a sample file used for testing upload, download, and file integrity operations.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.
+
+1234567890
+!@#$%^&*()_+-=[]{}|;':",./<>?
+
+End of example file.
