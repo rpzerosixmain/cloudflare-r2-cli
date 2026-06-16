@@ -9,14 +9,16 @@ module R2
       @service = service
     end
 
-    def upload(key, path, params = {})
+    def upload(key, path, options = {})
       body = File.binread(path)
-      @service.put(key, body, params)
+
+      @service.put(key, body, options)
+
       { key: key }
     end
 
-    def download(key, path, params = {})
-      resp = @service.get(key, params)
+    def download(key, path, options = {})
+      resp = @service.get(key, options)
       body = resp.body.read
 
       File.binwrite(path, body)
@@ -24,14 +26,14 @@ module R2
       { key: key, body: body }
     end
 
-    def delete(key, params = {})
-      @service.delete(key, params)
+    def delete(key, options = {})
+      @service.delete(key, options)
 
       { key: key }
     end
 
-    def list(params = {})
-      resp = @service.list(params)
+    def list(options = {})
+      resp = @service.list(options)
 
       {
         items: resp.contents.map { |item| { key: item.key, size: item.size } },

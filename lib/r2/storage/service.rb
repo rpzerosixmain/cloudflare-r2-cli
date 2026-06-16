@@ -19,32 +19,32 @@ module R2
         )
       end
 
-      def put(key, body, params = {})
+      def put(key, body, options = {})
         @s3.put_object(
-          bucket: params[:bucket],
-          key: build_key(params[:prefix], key),
+          bucket: options[:bucket],
+          key: build_key(options[:prefix], key),
           body: body,
         )
       end
 
-      def get(key, params = {})
+      def get(key, options = {})
         @s3.get_object(
-          bucket: params[:bucket],
-          key: build_key(params[:prefix], key),
+          bucket: options[:bucket],
+          key: build_key(options[:prefix], key),
         )
       end
 
-      def delete(key, params = {})
+      def delete(key, options = {})
         @s3.delete_object(
-          bucket: params[:bucket],
-          key: build_key(params[:prefix], key),
+          bucket: options[:bucket],
+          key: build_key(options[:prefix], key),
         )
       end
 
-      def list(params = {})
+      def list(options = {})
         @s3.list_objects_v2(
-          bucket: params[:bucket],
-          prefix: params[:prefix],
+          bucket: options[:bucket],
+          prefix: options[:prefix],
         )
       end
 

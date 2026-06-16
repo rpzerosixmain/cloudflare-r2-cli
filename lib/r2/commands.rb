@@ -11,26 +11,26 @@ module R2
     end
 
     class List < Base
-      def call(params = {})
-        storage.list(params)
+      def call(options = {})
+        storage.list(options)
       end
     end
 
     class Upload < Base
-      def call(key, path, params = {})
-        storage.upload(key, path, params)
+      def call(key, path, options = {})
+        storage.upload(key, path, options)
       end
     end
 
     class Download < Base
-      def call(key, path, params = {})
-        storage.download(key, path, params)
+      def call(key, path, options = {})
+        storage.download(key, path, options)
       end
     end
 
     class Delete < Base
-      def call(key, params = {})
-        storage.delete(key, params)
+      def call(key, options = {})
+        storage.delete(key, options)
       end
     end
   end
