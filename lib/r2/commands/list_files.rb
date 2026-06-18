@@ -8,16 +8,9 @@ module R2
       end
 
       def call(options = {})
-        resp = @storage.list(options)
+        result = @storage.list(options)
 
-        {
-          items: resp.contents.map do |item|
-            {
-              key: item.key,
-              size: item.size,
-            }
-          end,
-        }
+        result.to_h
       end
     end
   end

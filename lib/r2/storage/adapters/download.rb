@@ -8,9 +8,14 @@ module R2
       end
 
       def call(key, options = {})
-        @client.get_object(
+        resp = @client.get_object(
           bucket: options[:bucket],
           key: key,
+        )
+
+        Result.new(
+          key: key,
+          body: resp.body.read,
         )
       end
     end

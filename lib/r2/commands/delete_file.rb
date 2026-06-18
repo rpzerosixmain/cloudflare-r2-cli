@@ -8,9 +8,9 @@ module R2
       end
 
       def call(key, options = {})
-        @storage.delete(key, options)
+        result = @storage.delete(key, options)
 
-        { key: key }
+        result.to_h
       end
     end
   end

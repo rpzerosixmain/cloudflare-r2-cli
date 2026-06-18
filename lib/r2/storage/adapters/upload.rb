@@ -13,6 +13,10 @@ module R2
           key: key,
           body: body,
         )
+
+        Result.new(
+          key: key,
+        )
       end
     end
   end

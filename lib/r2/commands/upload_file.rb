@@ -10,9 +10,9 @@ module R2
       def call(key, path, options = {})
         body = File.binread(path)
 
-        @storage.upload(key, body, options)
+        result = @storage.upload(key, body, options)
 
-        { key: key }
+        result.to_h
       end
     end
   end

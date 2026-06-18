@@ -12,6 +12,10 @@ module R2
           bucket: options[:bucket],
           key: key,
         )
+
+        Result.new(
+          key: key,
+        )
       end
     end
   end

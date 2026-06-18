@@ -1,14 +1,8 @@
 # frozen_string_literal: true
 
-require 'aws-sdk-s3'
-
 module R2
   module Storage
     class Client
-      def self.build
-        new(Config.from_env)
-      end
-
       def initialize(config)
         s3_client = Aws::S3::Client.new(
           access_key_id: config.access_key_id,

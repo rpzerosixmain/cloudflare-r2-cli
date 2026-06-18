@@ -8,11 +8,11 @@ module R2
       end
 
       def call(key, path, options = {})
-        resp = @storage.download(key, options)
+        result = @storage.download(key, options)
 
-        File.binwrite(path, resp.body.read)
+        File.binwrite(path, result.data[:body])
 
-        { key: key }
+        result.to_h
       end
     end
   end
