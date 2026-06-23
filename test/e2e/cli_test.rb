@@ -16,40 +16,76 @@ class CliTest < Minitest::Test
     @keys_to_cleanup.each { |key| run_cmd_silently('delete', key) }
   end
 
-  def test_list
+  def test_list_returns_all_objects_from_bucket
     assert_success 'list'
   end
 
-  def test_upload
+  def test_delete_removes_existing_object
     key = unique_key
 
     with_fixture_file do |file_path|
-      assert_success 'upload', key, file_path
+      assert_success 'upload', file_path, key
     end
+
+    assert_success 'delete', key
   end
 
-  def test_download
+  def test_upload_stores_file_with_explicit_key
+    key = unique_key
+
+    with_fixture_file do |file_path|
+      assert_success 'upload', file_path, key
+    end
+
+    @keys_to_cleanup << key
+  end
+
+  def test_upload_without_key_uses_explicit_key_only
+    key = unique_key
+
+    with_fixture_file do |file_path|
+      assert_success 'upload', file_path, key
+    end
+
+    @keys_to_cleanup << key
+  end
+
+  def test_download_with_explicit_destination_path
     key = unique_key
     original_content = fixture_content
 
     with_fixture_file do |upload_path|
-      assert_success 'upload', key, upload_path
+      assert_success 'upload', upload_path, key
     end
 
     with_temp_file do |download_path|
       assert_success 'download', key, download_path
       assert_equal original_content, File.read(download_path)
     end
+
+    @keys_to_cleanup << key
   end
 
-  def test_delete
+  def test_download_without_path_defaults_to_basename_of_key
     key = unique_key
+    original_content = fixture_content
 
-    with_fixture_file do |file_path|
-      assert_success 'upload', key, file_path
+    with_fixture_file do |upload_path|
+      assert_success 'upload', upload_path, key
     end
 
-    assert_success 'delete', key
+    assert_success 'download', key
+
+    downloaded_path = File.basename(key)
+
+    assert File.exist?(downloaded_path),
+           "Expected downloaded file at #{downloaded_path}"
+
+    assert_equal original_content, File.read(downloaded_path)
+
+    FileUtils.rm_f(downloaded_path)
+
+    @keys_to_cleanup << key
   end
 
   private
@@ -59,9 +95,7 @@ class CliTest < Minitest::Test
   end
 
   def unique_key
-    key = "test/#{SecureRandom.uuid}"
-    @keys_to_cleanup << key
-    key
+    "test/#{SecureRandom.uuid}"
   end
 
   def assert_success(*args)
