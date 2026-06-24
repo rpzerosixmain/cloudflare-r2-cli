@@ -3,6 +3,7 @@
 require_relative 'r2/version'
 
 require_relative 'r2/client'
+require_relative 'r2/gateway'
 require_relative 'r2/cli'
 
 module R2

@@ -12,7 +12,7 @@ class R2ClientResultIntegrationTest < Minitest::Test
       secret_access_key: ENV.fetch('R2_SECRET_ACCESS_KEY_TEST'),
       endpoint: ENV.fetch('R2_ENDPOINT_TEST'),
       region: ENV.fetch('R2_REGION_TEST', 'auto'),
-      logger: Logger.new(StringIO.new)
+      logger: Logger.new(StringIO.new),
     )
 
     @key = "integration/#{SecureRandom.hex(8)}"

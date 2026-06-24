@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 require 'thor'
-require 'logger'
-
-require_relative 'cli/gateway'
 
 module R2
   class CLI < Thor
+    class << self
+      attr_accessor :gateway
+    end
+
     def self.exit_on_failure?
       true
     end
@@ -15,11 +16,6 @@ module R2
                  aliases: '-b',
                  default: 'main',
                  desc: 'R2 bucket name'
-
-    class_option :verbose,
-                 type: :boolean,
-                 default: false,
-                 desc: 'Show detailed logs'
 
     desc 'upload PATH [KEY]', 'Upload a file to R2'
     def upload(path, key = nil)
@@ -70,27 +66,7 @@ module R2
     private
 
     def gateway
-      @gateway ||= R2::CLI::Gateway.new(client: client)
-    end
-
-    def client
-      @client ||= R2::Client.new(
-        access_key_id: ENV.fetch('R2_ACCESS_KEY_ID'),
-        secret_access_key: ENV.fetch('R2_SECRET_ACCESS_KEY'),
-        endpoint: ENV.fetch('R2_ENDPOINT'),
-        region: ENV.fetch('R2_REGION', 'auto'),
-        logger: logger
-      )
-    end
-
-    def logger
-      @logger ||= Logger.new($stdout).tap do |logger|
-        logger.level = options[:verbose] ? Logger::INFO : Logger::FATAL
-
-        logger.formatter = proc do |_severity, _datetime, _progname, msg|
-          "[R2] #{msg}\n"
-        end
-      end
+      self.class.gateway
     end
   end
 end

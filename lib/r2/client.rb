@@ -35,22 +35,22 @@ module R2
     end
 
     def list(bucket:)
-      logger.info("list:start bucket=#{bucket}")
+      logger.debug("list:start bucket=#{bucket}")
 
       result = @s3.list_objects_v2(bucket: bucket).contents.map do |object|
         Result.new(
           key: object.key,
-          etag: object.etag
+          etag: object.etag,
         )
       end
 
-      logger.info("list:ok bucket=#{bucket} count=#{result.size}")
+      logger.debug("list:ok bucket=#{bucket} count=#{result.size}")
 
       result
     end
 
     def upload(bucket:, key:, body:)
-      logger.info("upload:start bucket=#{bucket} key=#{key}")
+      logger.debug("upload:start bucket=#{bucket} key=#{key}")
 
       @s3.put_object(
         bucket: bucket,
@@ -58,13 +58,13 @@ module R2
         body: body,
       )
 
-      logger.info("upload:ok bucket=#{bucket} key=#{key}")
+      logger.debug("upload:ok bucket=#{bucket} key=#{key}")
 
       Result.new(key: key)
     end
 
     def download(bucket:, key:)
-      logger.info("download:start bucket=#{bucket} key=#{key}")
+      logger.debug("download:start bucket=#{bucket} key=#{key}")
 
       resp = @s3.get_object(
         bucket: bucket,
@@ -73,23 +73,23 @@ module R2
 
       body = resp.body.read
 
-      logger.info("download:ok bucket=#{bucket} key=#{key} size=#{body.bytesize}")
+      logger.debug("download:ok bucket=#{bucket} key=#{key} size=#{body.bytesize}")
 
       Result.new(
         key: key,
-        body: body
+        body: body,
       )
     end
 
     def delete(bucket:, key:)
-      logger.info("delete:start bucket=#{bucket} key=#{key}")
+      logger.debug("delete:start bucket=#{bucket} key=#{key}")
 
       @s3.delete_object(
         bucket: bucket,
         key: key,
       )
 
-      logger.info("delete:ok bucket=#{bucket} key=#{key}")
+      logger.debug("delete:ok bucket=#{bucket} key=#{key}")
 
       Result.new(key: key)
     end

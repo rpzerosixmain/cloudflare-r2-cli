@@ -3,7 +3,25 @@
 
 require 'bundler/setup'
 require 'dotenv/load'
+require 'logger'
 
 require 'r2'
+
+logger = Logger.new($stdout)
+logger.level = Logger::FATAL
+
+logger.formatter = proc do |_severity, _datetime, _progname, msg|
+  "[R2] #{msg}\n"
+end
+
+client = R2::Client.new(
+  access_key_id: ENV.fetch('R2_ACCESS_KEY_ID'),
+  secret_access_key: ENV.fetch('R2_SECRET_ACCESS_KEY'),
+  endpoint: ENV.fetch('R2_ENDPOINT'),
+  region: ENV.fetch('R2_REGION', 'auto'),
+  logger: logger
+)
+
+R2::CLI.gateway = R2::Gateway.new(client: client)
 
 R2::CLI.start(ARGV)
