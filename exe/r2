@@ -8,7 +8,7 @@ require 'logger'
 require 'r2'
 
 logger = Logger.new($stdout)
-logger.level = Logger::FATAL
+logger.level = Logger::ERROR
 
 logger.formatter = proc do |_severity, _datetime, _progname, msg|
   "[R2] #{msg}\n"
@@ -19,9 +19,20 @@ client = R2::Client.new(
   secret_access_key: ENV.fetch('R2_SECRET_ACCESS_KEY'),
   endpoint: ENV.fetch('R2_ENDPOINT'),
   region: ENV.fetch('R2_REGION', 'auto'),
-  logger: logger
+  logger: logger,
 )
 
-R2::CLI.gateway = R2::Gateway.new(client: client)
+gateway = R2::Gateway.new(
+  client: client,
+)
 
-R2::CLI.start(ARGV)
+R2::CLI.gateway = gateway
+
+begin
+  R2::CLI.start(ARGV)
+rescue StandardError => e
+  logger.error(e.full_message)
+
+  warn("[R2] #{e.message}")
+  exit(1)
+end

@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
-require 'dotenv'
+require 'bundler/setup'
 
+require 'dotenv'
 Dotenv.load(*Dir['.env*'])
 
 require 'minitest/autorun'
-require 'securerandom'
-require 'tempfile'
 require 'open3'
-require 'logger'
+require 'securerandom'
 require 'stringio'
+require 'tempfile'
+
+require 'r2'

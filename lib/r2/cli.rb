@@ -59,7 +59,7 @@ module R2
       end
 
       items.each do |item|
-        say("[R2] #{item.key} (etag: #{item.etag})")
+        say("[R2] #{item.key}")
       end
     end
 
