@@ -10,13 +10,13 @@ class E2ETest < Minitest::Test
   end
 
   def teardown
-    @keys_to_cleanup.each { |key| run_cmd_silently('delete', key) }
+    @keys_to_cleanup.each { |key| run_cmd('delete', key) }
   end
 
   private
 
   def fixture_content
-    @fixture_content ||= File.read('test/fixtures/test-file.txt')
+    @fixture_content ||= File.read('test/fixtures/files/data.txt')
   end
 
   def unique_key
@@ -38,10 +38,6 @@ class E2ETest < Minitest::Test
   end
 
   def run_cmd(*)
-    Open3.capture3(*BIN, *)
-  end
-
-  def run_cmd_silently(*)
     Open3.capture3(*BIN, *)
   end
 
