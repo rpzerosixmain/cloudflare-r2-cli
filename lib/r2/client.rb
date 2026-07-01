@@ -4,15 +4,6 @@ require 'aws-sdk-s3'
 
 module R2
   class Client
-    class Result
-      attr_reader :key, :body
-
-      def initialize(key: nil, body: nil)
-        @key = key
-        @body = body
-      end
-    end
-
     attr_accessor :logger
 
     def initialize(
@@ -29,14 +20,6 @@ module R2
       )
     end
 
-    def list(bucket:)
-      handle_errors do
-        @s3.list_objects_v2(bucket: bucket).contents.map do |object|
-          Result.new(key: object.key)
-        end
-      end
-    end
-
     def upload(bucket:, key:, body:)
       handle_errors do
         @s3.put_object(
@@ -45,32 +28,7 @@ module R2
           body: body,
         )
 
-        Result.new(key: key)
-      end
-    end
-
-    def download(bucket:, key:)
-      handle_errors do
-        resp = @s3.get_object(
-          bucket: bucket,
-          key: key,
-        )
-
-        Result.new(
-          key: key,
-          body: resp.body.read,
-        )
-      end
-    end
-
-    def delete(bucket:, key:)
-      handle_errors do
-        @s3.delete_object(
-          bucket: bucket,
-          key: key,
-        )
-
-        Result.new(key: key)
+        { key: key }
       end
     end
 
@@ -84,7 +42,6 @@ module R2
            Aws::Errors::ServiceError => e
 
       logger&.error(e.message)
-
       raise R2::Error, e.message
     end
   end

@@ -23,11 +23,7 @@ client = R2::Client.new(
 
 client.logger = logger
 
-gateway = R2::Gateway.new(
-  client: client,
-)
-
-R2::CLI.gateway = gateway
+R2::CLI.client = client
 
 begin
   R2::CLI.start(ARGV)

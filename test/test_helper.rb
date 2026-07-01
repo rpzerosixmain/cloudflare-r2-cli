@@ -2,8 +2,7 @@
 
 require 'bundler/setup'
 
-require 'dotenv'
-Dotenv.load(*Dir['.env*'])
+require 'dotenv/load'
 
 require 'minitest/autorun'
 
