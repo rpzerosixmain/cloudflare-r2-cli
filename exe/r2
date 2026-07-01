@@ -7,9 +7,11 @@ require 'logger'
 
 require 'r2'
 
+# Logger padrão da CLI (não usar logger global do R2)
 logger = Logger.new($stdout)
 logger.level = Logger::ERROR
 
+# Formato simplificado para saída de CLI
 logger.formatter = proc do |_severity, _datetime, _progname, msg|
   "[R2] #{msg}\n"
 end
@@ -23,6 +25,7 @@ client = R2::Client.new(
 
 client.logger = logger
 
+# Injeta client na CLI (dependency injection simples)
 R2::CLI.client = client
 
 begin

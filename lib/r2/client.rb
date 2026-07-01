@@ -3,6 +3,10 @@
 require 'aws-sdk-s3'
 
 module R2
+  # Client responsible for encapsulating S3/R2 operations.
+  #
+  # Acts as an adaptation layer between the application and the AWS SDK,
+  # centralizing calls and error handling.
   class Client
     attr_accessor :logger
 
@@ -20,6 +24,14 @@ module R2
       )
     end
 
+    # Uploads an object to the specified bucket.
+    #
+    # @param bucket [String] bucket name
+    # @param key [String] object key in storage
+    # @param body [String, IO] file content
+    # @return [Hash] returns only the key of the uploaded object
+    #
+    # @raise [R2::Error] when an S3 service error occurs
     def upload(bucket:, key:, body:)
       handle_errors do
         @s3.put_object(
@@ -34,6 +46,9 @@ module R2
 
     private
 
+    # Executes a block with standardized S3 error handling.
+    #
+    # Converts AWS SDK errors into R2::Error and logs them if a logger is present.
     def handle_errors
       yield
     rescue Aws::S3::Errors::NoSuchBucket,

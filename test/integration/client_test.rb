@@ -18,7 +18,7 @@ class ClientTest < Minitest::Test
     result = @client.upload(
       bucket: 'test',
       key: key,
-      body: 'Hello, R2!',
+      body: 'data',
     )
 
     assert_equal key, result[:key]
@@ -29,7 +29,7 @@ class ClientTest < Minitest::Test
       @client.upload(
         bucket: 'bucket-that-does-not-exist',
         key: 'file.txt',
-        body: 'data'
+        body: 'data',
       )
     end
   end

@@ -10,7 +10,7 @@ class CLITest < Minitest::Test
     R2::CLI.client = @client
   end
 
-  def test_upload
+  def test_cli_upload_sends_file_to_client_and_prints_output
     with_text do |path|
       stdout = capture_io do
         R2::CLI.start(['upload', path])
