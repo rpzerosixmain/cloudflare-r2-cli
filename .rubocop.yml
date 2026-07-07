@@ -1,10 +1,21 @@
 AllCops:
   NewCops: enable
   TargetRubyVersion: 3.2
+  SuggestExtensions: false
   Exclude:
     - 'bin/**/*'
     - 'vendor/**/*'
     - 'node_modules/**/*'
+
+Gemspec/DevelopmentDependencies:
+  EnforcedStyle: gemspec
+
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
+Naming/MethodParameterName:
+  AllowedNames:
+    - s3
 
 Layout/LineLength:
   Max: 100

@@ -31,12 +31,7 @@ class CLITest < Minitest::Test
       file.flush
 
       capture_io do
-        R2::CLI.start([
-                        'upload',
-                        file.path,
-                        '--bucket',
-                        'images',
-                      ])
+        R2::CLI.start(['upload', file.path, '--bucket', 'images'])
       end
 
       assert_equal 'images', @storage.bucket

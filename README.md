@@ -1,7 +1,3 @@
-Here is the English version:
-
----
-
 # R2
 
 R2 is a simple command-line interface (CLI) for interacting with [Cloudflare R2](https://developers.cloudflare.com/r2/) through the S3-compatible API.
@@ -14,7 +10,7 @@ R2 is a simple command-line interface (CLI) for interacting with [Cloudflare R2]
 
 ## Requirements
 
-* Ruby >= 3.1
+* Ruby >= 3.2
 * A Cloudflare account with an R2 bucket created
 * S3-compatible access credentials (Access Key ID and Secret Access Key)
 
