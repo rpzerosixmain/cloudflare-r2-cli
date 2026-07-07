@@ -16,12 +16,17 @@ logger.formatter = proc do |_severity, _datetime, _progname, msg|
   "[R2] #{msg}\n"
 end
 
-storage = R2::Storage.new(
-  access_key_id: ENV.fetch('R2_ACCESS_KEY_ID'),
-  secret_access_key: ENV.fetch('R2_SECRET_ACCESS_KEY'),
-  endpoint: ENV.fetch('R2_ENDPOINT'),
-  region: ENV.fetch('R2_REGION', 'auto'),
-)
+begin
+  storage = R2::Storage.new(
+    access_key_id: ENV.fetch('R2_ACCESS_KEY_ID'),
+    secret_access_key: ENV.fetch('R2_SECRET_ACCESS_KEY'),
+    endpoint: ENV.fetch('R2_ENDPOINT'),
+    region: ENV.fetch('R2_REGION', 'auto'),
+  )
+rescue KeyError => e
+  warn("[R2] missing required environment variable: #{e.key}")
+  exit(1)
+end
 
 storage.logger = logger
 
@@ -30,9 +35,14 @@ R2::CLI.storage = storage
 
 begin
   R2::CLI.start(ARGV)
-rescue StandardError => e
+rescue R2::Error => e
   logger.error(e.full_message)
 
   warn("[R2] #{e.message}")
+  exit(1)
+rescue StandardError => e
+  logger.error(e.full_message)
+
+  warn("[R2] unexpected error: #{e.message}")
   exit(1)
 end

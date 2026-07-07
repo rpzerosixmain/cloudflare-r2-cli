@@ -1,20 +1,16 @@
-Here is the English version:
-
----
-
 # R2
 
 R2 is a simple command-line interface (CLI) for interacting with [Cloudflare R2](https://developers.cloudflare.com/r2/) through the S3-compatible API.
 
 ## Features
 
-* Upload files to an R2 bucket
+* Upload files to an R2 bucket (streamed, with automatic `Content-Type` detection and a progress bar for large files)
 
 > New operations (download, delete, list) are planned for future releases.
 
 ## Requirements
 
-* Ruby >= 3.1
+* Ruby >= 3.2
 * A Cloudflare account with an R2 bucket created
 * S3-compatible access credentials (Access Key ID and Secret Access Key)
 
@@ -40,7 +36,7 @@ gem install r2
 
 ## Configuration
 
-The R2 CLI reads credentials from environment variables. Create a `.env` file in your project root (based on `.env.example`, if available) with:
+The R2 CLI reads credentials from environment variables. Create a `.env` file in your project root (based on `.env.example`) with:
 
 ```bash
 R2_ACCESS_KEY_ID=your_access_key_id
@@ -75,7 +71,7 @@ r2 upload ./report.pdf
 Expected output:
 
 ```
-[R2] upload -> ./report.pdf
+[R2] upload -> report.pdf
 ```
 
 #### Options
@@ -114,7 +110,10 @@ rake test:unit         # unit tests
 rake test:e2e          # end-to-end tests via CLI binary
 ```
 
-Integration and e2e tests require a valid `.env` file since they interact with a real R2 bucket.
+> **Warning:** the end-to-end tests (`rake test:e2e`, and therefore `rake test:all`)
+> require **real** credentials in a valid `.env` file and perform actual uploads to
+> your R2 bucket. Run only the unit tests (`rake test:unit`) if you don't want to
+> hit a real bucket. Continuous integration runs the unit tests only.
 
 ### Lint
 

@@ -9,6 +9,9 @@ AllCops:
 Layout/LineLength:
   Max: 100
 
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
 Metrics/MethodLength:
   Max: 15
 
@@ -47,3 +50,8 @@ Lint/UnusedMethodArgument:
 
 Naming/VariableName:
   Enabled: true
+
+Naming/MethodParameterName:
+  AllowedNames:
+    - s3
+    - io
