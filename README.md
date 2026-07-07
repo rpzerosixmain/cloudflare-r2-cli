@@ -112,6 +112,21 @@ rake test:e2e          # end-to-end tests via CLI binary
 
 Integration and e2e tests require a valid `.env` file since they interact with a real R2 bucket.
 
+### Debug helpers
+
+Rake tasks for quick manual debugging. Sample files are written to `tmp/debug`
+(gitignored) in the supported sizes: `1mb`, `5mb`, `10mb`.
+
+```bash
+rake debug:files          # generate all sample files (1mb, 5mb, 10mb)
+rake "debug:file[10mb]"   # generate a single sample file
+rake "debug:upload[10mb]" # generate a file and upload it via the CLI
+rake debug:clean          # remove generated debug files
+```
+
+`debug:upload` runs the real CLI, so it requires a valid `.env`. The output
+directory can be overridden with the `R2_DEBUG_DIR` environment variable.
+
 ### Lint
 
 The project uses [RuboCop](https://github.com/rubocop/rubocop) for style enforcement:
