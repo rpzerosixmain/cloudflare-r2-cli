@@ -3,8 +3,6 @@
 require 'tempfile'
 
 module TempFileHelper
-  private
-
   # Default content used in CLI E2E tests
   DEFAULT_CONTENT = <<~TEXT
     This is a test file for R2 CLI.
@@ -13,6 +11,8 @@ module TempFileHelper
     Line 2
     Line 3
   TEXT
+
+  private
 
   # Executes a block with a temporary file containing default text.
   def with_text(&)
