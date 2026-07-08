@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'logger'
 require 'thor'
 
 module R2
@@ -25,6 +26,13 @@ module R2
                  default: 'main',
                  desc: 'R2 bucket name'
 
+    # Enables verbose logging (INFO level) for the underlying operations.
+    class_option :verbose,
+                 type: :boolean,
+                 aliases: '-v',
+                 default: false,
+                 desc: 'Enable verbose logging'
+
     # Uploads a file to the configured bucket.
     #
     # Reads the entire file into memory before uploading.
@@ -32,16 +40,29 @@ module R2
     # @param path [String] local file path
     desc 'upload PATH', 'Upload a file to R2'
     def upload(path)
+      apply_log_level
+
+      bucket = options.fetch(:bucket)
+      logger&.info("uploading #{path} to bucket #{bucket}")
+
       result = storage.upload(
         key: File.basename(path),
-        bucket: options.fetch(:bucket),
+        bucket: bucket,
         body: read_file(path),
       )
 
+      logger&.info("uploaded #{result[:key]}")
       say("[R2] upload -> #{result[:key]}")
     end
 
     private
+
+    # Adjusts the logger verbosity based on the --verbose flag.
+    def apply_log_level
+      return unless logger
+
+      logger.level = options[:verbose] ? Logger::INFO : Logger::ERROR
+    end
 
     # Reads a local file, raising a friendly R2::FileError on common problems.
     #
@@ -57,6 +78,11 @@ module R2
     # Access to the storage instance injected into the class.
     def storage
       self.class.storage
+    end
+
+    # Logger owned by the injected storage, if any.
+    def logger
+      storage.logger
     end
   end
 end

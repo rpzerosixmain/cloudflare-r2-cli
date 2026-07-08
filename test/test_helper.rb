@@ -6,6 +6,7 @@ require 'dotenv/load'
 
 require 'minitest/autorun'
 
+require 'logger'
 require 'open3'
 require 'securerandom'
 require 'stringio'

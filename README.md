@@ -76,14 +76,21 @@ Expected output:
 
 #### Options
 
-| Option     | Alias | Default | Description           |
-| ---------- | ----- | ------- | --------------------- |
-| `--bucket` | `-b`  | `main`  | Target R2 bucket name |
+| Option      | Alias | Default | Description                        |
+| ----------- | ----- | ------- | ---------------------------------- |
+| `--bucket`  | `-b`  | `main`  | Target R2 bucket name              |
+| `--verbose` | `-v`  | `false` | Enable verbose (INFO-level) logging |
 
 **Example with custom bucket:**
 
 ```bash
 r2 upload ./report.pdf --bucket my-bucket
+```
+
+**Example with verbose logging:**
+
+```bash
+r2 upload ./report.pdf --verbose
 ```
 
 ## Development

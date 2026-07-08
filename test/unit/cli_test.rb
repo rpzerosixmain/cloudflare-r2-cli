@@ -61,4 +61,44 @@ class CLITest < Minitest::Test
       assert_equal 'hello world', @storage.body
     end
   end
+
+  def test_verbose_lowers_log_level_and_logs
+    io = StringIO.new
+    @storage.logger = build_logger(io)
+
+    with_upload(['--verbose'])
+
+    assert_equal Logger::INFO, @storage.logger.level
+    assert_match(/uploading/, io.string)
+    assert_match(/uploaded/, io.string)
+  end
+
+  def test_without_verbose_keeps_error_level_and_is_quiet
+    io = StringIO.new
+    @storage.logger = build_logger(io)
+
+    with_upload([])
+
+    assert_equal Logger::ERROR, @storage.logger.level
+    assert_empty io.string
+  end
+
+  private
+
+  def build_logger(output)
+    logger = Logger.new(output)
+    logger.level = Logger::ERROR
+    logger
+  end
+
+  def with_upload(extra_args)
+    Tempfile.create(['example', '.txt']) do |file|
+      file.write('hello world')
+      file.flush
+
+      capture_io do
+        R2::CLI.start(['upload', file.path, *extra_args])
+      end
+    end
+  end
 end
