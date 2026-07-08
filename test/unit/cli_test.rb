@@ -5,34 +5,26 @@ require_relative '../test_helper'
 class CLITest < Minitest::Test
   def setup
     @storage = FakeStorage.new
-    R2::CLI.storage = @storage
-    R2::CLI.logger = nil
-  end
-
-  def teardown
-    R2::CLI.logger = nil
   end
 
   def test_upload_stores_file_and_outputs_result
-    Tempfile.create(['example', '.txt']) do |file|
-      file.binmode
-      file.write('hello world')
-      file.flush
+    with_upload
 
-      capture_io do
-        R2::CLI.start(['upload', file.path])
-      end
+    assert_equal 'main', @storage.bucket
+    assert_equal File.basename(@last_path), @storage.key
+    assert_equal 'hello world', @storage.body
+  end
 
-      assert_equal 'main', @storage.bucket
-      assert_equal File.basename(file.path), @storage.key
-      assert_equal 'hello world', @storage.body
-    end
+  def test_upload_sets_content_type_from_extension
+    with_upload
+
+    assert_equal 'text/plain', @storage.content_type
   end
 
   def test_upload_raises_file_error_when_missing
     error = assert_raises(R2::FileError) do
       capture_io do
-        R2::CLI.start(['upload', '/no/such/file.txt'])
+        R2::CLI.start(['upload', '/no/such/file.txt'], storage: @storage)
       end
     end
 
@@ -43,7 +35,7 @@ class CLITest < Minitest::Test
     Dir.mktmpdir do |dir|
       error = assert_raises(R2::FileError) do
         capture_io do
-          R2::CLI.start(['upload', dir])
+          R2::CLI.start(['upload', dir], storage: @storage)
         end
       end
 
@@ -52,25 +44,26 @@ class CLITest < Minitest::Test
   end
 
   def test_upload_with_custom_bucket
-    Tempfile.create(['example', '.txt']) do |file|
-      file.binmode
-      file.write('hello world')
-      file.flush
+    with_upload(args: ['--bucket', 'images'])
 
-      capture_io do
-        R2::CLI.start(['upload', file.path, '--bucket', 'images'])
-      end
-
-      assert_equal 'images', @storage.bucket
-      assert_equal File.basename(file.path), @storage.key
-      assert_equal 'hello world', @storage.body
-    end
+    assert_equal 'images', @storage.bucket
+    assert_equal File.basename(@last_path), @storage.key
   end
 
-  def test_defaults_to_null_logger_and_uploads_without_injected_logger
-    assert_instance_of R2::NullLogger, R2::CLI.logger
+  def test_upload_with_prefix_builds_folder_key
+    with_upload(args: ['--prefix', 'photos/'])
 
-    with_upload([])
+    assert_equal "photos/#{File.basename(@last_path)}", @storage.key
+  end
+
+  def test_upload_with_explicit_key_overrides_prefix
+    with_upload(args: ['--prefix', 'photos', '--key', 'custom/name.txt'])
+
+    assert_equal 'custom/name.txt', @storage.key
+  end
+
+  def test_upload_without_injected_logger_uses_null_logger
+    with_upload(logger: nil)
 
     assert_equal File.basename(@last_path), @storage.key
   end
@@ -78,9 +71,8 @@ class CLITest < Minitest::Test
   def test_verbose_lowers_log_level_and_logs
     output = StringIO.new
     logger = build_logger(output)
-    R2::CLI.logger = logger
 
-    with_upload(['--verbose'])
+    with_upload(args: ['--verbose'], logger: logger)
 
     assert_equal Logger::INFO, logger.level
     assert_match(/uploading/, output.string)
@@ -90,9 +82,8 @@ class CLITest < Minitest::Test
   def test_without_verbose_keeps_error_level_and_is_quiet
     output = StringIO.new
     logger = build_logger(output)
-    R2::CLI.logger = logger
 
-    with_upload([])
+    with_upload(logger: logger)
 
     assert_equal Logger::ERROR, logger.level
     assert_empty output.string
@@ -106,14 +97,14 @@ class CLITest < Minitest::Test
     logger
   end
 
-  def with_upload(extra_args)
+  def with_upload(args: [], logger: nil)
     Tempfile.create(['example', '.txt']) do |file|
       file.write('hello world')
       file.flush
       @last_path = file.path
 
       capture_io do
-        R2::CLI.start(['upload', file.path, *extra_args])
+        R2::CLI.start(['upload', file.path, *args], storage: @storage, logger: logger)
       end
     end
   end

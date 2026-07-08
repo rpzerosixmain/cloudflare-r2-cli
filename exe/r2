@@ -16,13 +16,11 @@ logger.formatter = proc do |_severity, _datetime, _progname, msg|
   "[R2] #{msg}\n"
 end
 
-# Simple dependency injection into the CLI layer.
-R2::CLI.logger = logger
-
 begin
-  R2::CLI.storage = R2::Storage.new(**R2::Configuration.from_env.to_h)
+  storage = R2::Storage.new(**R2::Configuration.from_env.to_h)
 
-  R2::CLI.start(ARGV)
+  # Dependencies are injected per invocation (no global mutable state).
+  R2::CLI.start(ARGV, storage: storage, logger: logger)
 rescue R2::Error => e
   # Expected, user-facing failures: log the message and show it concisely.
   logger.error(e.message)

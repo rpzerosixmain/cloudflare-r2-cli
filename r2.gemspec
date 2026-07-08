@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'aws-sdk-s3', '~> 1.225.0'
   spec.add_dependency 'dotenv', '~> 3.2.0'
+  spec.add_dependency 'marcel', '~> 1.0'
   spec.add_dependency 'rexml', '~> 3.4.4'
   spec.add_dependency 'thor', '~> 1.5.0'
 

@@ -28,6 +28,17 @@ class StorageTest < Minitest::Test
     assert_equal({ key: 'file.txt' }, result)
   end
 
+  def test_upload_forwards_content_type_when_given
+    @storage.upload(
+      bucket: 'bucket',
+      key: 'file.txt',
+      body: 'content',
+      content_type: 'text/plain',
+    )
+
+    assert_equal 'text/plain', @s3.content_type
+  end
+
   def test_upload_raises_r2_error
     @s3.error = Aws::S3::Errors::NoSuchBucket.new(nil, 'Bucket not found')
 

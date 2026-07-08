@@ -76,15 +76,32 @@ Expected output:
 
 #### Options
 
-| Option      | Alias | Default | Description                        |
-| ----------- | ----- | ------- | ---------------------------------- |
-| `--bucket`  | `-b`  | `main`  | Target R2 bucket name              |
-| `--verbose` | `-v`  | `false` | Enable verbose (INFO-level) logging |
+| Option      | Alias | Default          | Description                                         |
+| ----------- | ----- | ---------------- | --------------------------------------------------- |
+| `--bucket`  | `-b`  | `main`           | Target R2 bucket name                               |
+| `--key`     | `-k`  | file name        | Full destination object key (overrides `--prefix`)  |
+| `--prefix`  | `-p`  | —                | Key prefix ("folder") prepended to the file name    |
+| `--verbose` | `-v`  | `false`          | Enable verbose (INFO-level) logging                 |
+
+The file is streamed to R2 (not buffered in memory) and its `Content-Type` is
+detected from the file name.
 
 **Example with custom bucket:**
 
 ```bash
 r2 upload ./report.pdf --bucket my-bucket
+```
+
+**Example storing under a folder (`photos/report.pdf`):**
+
+```bash
+r2 upload ./report.pdf --prefix photos
+```
+
+**Example with an explicit key:**
+
+```bash
+r2 upload ./report.pdf --key reports/2024/report.pdf
 ```
 
 **Example with verbose logging:**

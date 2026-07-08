@@ -28,17 +28,17 @@ module R2
     #
     # @param bucket [String] storage bucket name
     # @param key [String] object key in storage
-    # @param body [String, IO] file content
+    # @param body [String, IO] file content (an IO is streamed, not buffered)
+    # @param content_type [String, nil] optional MIME type for the object
     # @return [Hash] returns only the key of the stored object
     #
     # @raise [R2::Error] when a storage service error occurs
-    def upload(bucket:, key:, body:)
+    def upload(bucket:, key:, body:, content_type: nil)
       handle_errors do
-        s3.put_object(
-          bucket: bucket,
-          key: key,
-          body: body,
-        )
+        params = { bucket: bucket, key: key, body: body }
+        params[:content_type] = content_type if content_type
+
+        s3.put_object(**params)
 
         { key: key }
       end
