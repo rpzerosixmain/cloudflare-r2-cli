@@ -1,6 +1,11 @@
+````markdown
 # R2
 
 R2 is a simple command-line interface (CLI) for interacting with [Cloudflare R2](https://developers.cloudflare.com/r2/) through the S3-compatible API.
+
+> This is a personal side project, not an officially maintained product.
+> It may contain bugs, breaking changes, or incomplete features. Use at your
+> own risk, especially in production environments.
 
 ## Features
 
@@ -20,7 +25,7 @@ Add it to your `Gemfile`:
 
 ```ruby
 gem 'r2'
-```
+````
 
 Then run:
 
@@ -70,18 +75,18 @@ r2 upload ./report.pdf
 
 Expected output:
 
-```
+```text
 [R2] upload -> ./report.pdf
 ```
 
 #### Options
 
-| Option      | Alias | Default          | Description                                         |
-| ----------- | ----- | ---------------- | --------------------------------------------------- |
-| `--bucket`  | `-b`  | `main`           | Target R2 bucket name                               |
-| `--key`     | `-k`  | file name        | Full destination object key (overrides `--prefix`)  |
-| `--prefix`  | `-p`  | —                | Key prefix ("folder") prepended to the file name    |
-| `--verbose` | `-v`  | `false`          | Enable verbose (INFO-level) logging                 |
+| Option      | Alias | Default   | Description                                        |
+| ----------- | ----- | --------- | -------------------------------------------------- |
+| `--bucket`  | `-b`  | `main`    | Target R2 bucket name                              |
+| `--key`     | `-k`  | file name | Full destination object key (overrides `--prefix`) |
+| `--prefix`  | `-p`  | —         | Key prefix ("folder") prepended to the file name   |
+| `--verbose` | `-v`  | `false`   | Enable verbose (INFO-level) logging                |
 
 The file is streamed to R2 (not buffered in memory) and its `Content-Type` is
 detected from the file name.
@@ -129,27 +134,66 @@ bin/console
 The project has three test levels:
 
 ```bash
-rake test:all          # runs full test suite
-rake test:unit         # unit tests
-rake test:e2e          # end-to-end tests via CLI binary
+rake test:all
+rake test:unit
+rake test:e2e
 ```
 
-Integration and e2e tests require a valid `.env` file since they interact with a real R2 bucket.
+* `test:unit` runs isolated tests for individual components.
+* `test:e2e` runs end-to-end tests through the CLI binary.
+
+Integration and e2e tests require a valid `.env` file since they interact with
+a real R2 bucket.
 
 ### Debug helpers
 
-Rake tasks for quick manual debugging. Sample files are written to `tmp/debug`
-(gitignored) in the supported sizes: `1mb`, `5mb`, `10mb`.
+Rake tasks for generating and cleaning local debug files. Generated files are
+stored in `tmp/debug` (gitignored).
 
-```bash
-rake debug:files          # generate all sample files (1mb, 5mb, 10mb)
-rake "debug:file[10mb]"   # generate a single sample file
-rake "debug:upload[10mb]" # generate a file and upload it via the CLI
-rake debug:clean          # remove generated debug files
+Generated debug files use the following naming format:
+
+```text
+YYYYMMDD_HHMMSS_SIZEmb.bin
 ```
 
-`debug:upload` runs the real CLI, so it requires a valid `.env`. The output
-directory can be overridden with the `R2_DEBUG_DIR` environment variable.
+Example:
+
+```text
+20260713_190000_10mb.bin
+```
+
+Generate a debug file:
+
+```bash
+rake debug:seed
+```
+
+Example output:
+
+```text
+[debug] seeded tmp/debug/20260713_190000_10mb.bin (10 MiB)
+```
+
+Remove generated debug files:
+
+```bash
+rake debug:clean
+```
+
+The default generated file size is `10 MiB`. The output directory can be
+overridden with the `R2_DEBUG_DIR` environment variable.
+
+Example:
+
+```bash
+R2_DEBUG_DIR=tmp/samples rake debug:seed
+```
+
+Generated debug files can be used for manual testing:
+
+```bash
+r2 upload tmp/debug/20260713_190000_10mb.bin
+```
 
 ### Lint
 
