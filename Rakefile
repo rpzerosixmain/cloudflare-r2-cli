@@ -4,5 +4,5 @@ Dir.glob('tasks/*.rake').each do |task|
   import task
 end
 
-desc 'Run full test suite'
-task default: 'test:all'
+desc 'Run the hermetic unit test suite'
+task default: 'test:unit'

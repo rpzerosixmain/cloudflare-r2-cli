@@ -1,4 +1,3 @@
-````markdown
 # R2
 
 R2 is a simple command-line interface (CLI) for interacting with [Cloudflare R2](https://developers.cloudflare.com/r2/) through the S3-compatible API.
@@ -15,17 +14,20 @@ R2 is a simple command-line interface (CLI) for interacting with [Cloudflare R2]
 
 ## Requirements
 
-* Ruby >= 3.2
+* Ruby >= 3.3
 * A Cloudflare account with an R2 bucket created
 * S3-compatible access credentials (Access Key ID and Secret Access Key)
 
 ## Installation
 
+The package name is `cloudflare-r2-cli` (the name `r2` is already taken on
+RubyGems) and installs an `r2` executable.
+
 Add it to your `Gemfile`:
 
 ```ruby
-gem 'r2'
-````
+gem 'cloudflare-r2-cli'
+```
 
 Then run:
 
@@ -36,7 +38,7 @@ bundle install
 Or install it directly:
 
 ```bash
-gem install r2
+gem install cloudflare-r2-cli
 ```
 
 ## Configuration
@@ -57,6 +59,9 @@ R2_REGION=auto
 | `R2_ENDPOINT`          |    Yes   |    —    | S3 endpoint for your R2 bucket |
 | `R2_REGION`            |    No    |  `auto` | Region used in requests        |
 
+Credentials are only required for commands that talk to R2. Informational
+commands such as `r2 help` work without any configuration.
+
 ## Usage
 
 ### Upload
@@ -73,10 +78,10 @@ r2 upload PATH
 r2 upload ./report.pdf
 ```
 
-Expected output:
+Expected output (the printed value is the destination object key, not the local path):
 
 ```text
-[R2] upload -> ./report.pdf
+[R2] upload -> report.pdf
 ```
 
 #### Options
@@ -90,6 +95,9 @@ Expected output:
 
 The file is streamed to R2 (not buffered in memory) and its `Content-Type` is
 detected from the file name.
+
+> Uploads use a single `PutObject` request without multipart support or a
+> progress indicator, so very large files are uploaded in one shot.
 
 **Example with custom bucket:**
 
@@ -115,6 +123,9 @@ r2 upload ./report.pdf --key reports/2024/report.pdf
 r2 upload ./report.pdf --verbose
 ```
 
+On unexpected errors the CLI prints a concise message. Set `R2_DEBUG=1` to also
+print the full backtrace when debugging.
+
 ## Development
 
 After cloning the repository, install dependencies:
@@ -131,19 +142,17 @@ bin/console
 
 ### Tests
 
-The project has three test levels:
+The project has three test tasks:
 
 ```bash
-rake test:all
-rake test:unit
-rake test:e2e
+rake            # default: unit tests only (hermetic)
+rake test:unit  # isolated tests for individual components
+rake test:e2e   # end-to-end tests through the CLI binary (needs real R2 creds)
 ```
 
-* `test:unit` runs isolated tests for individual components.
-* `test:e2e` runs end-to-end tests through the CLI binary.
-
-Integration and e2e tests require a valid `.env` file since they interact with
-a real R2 bucket.
+`rake` (and `rake test:unit`) never touch the network. The `test:e2e` task talks
+to a real R2 bucket, so it is not part of the default run and is skipped
+automatically unless valid `R2_*` credentials are present in the environment.
 
 ### Debug helpers
 
@@ -181,7 +190,8 @@ rake debug:clean
 ```
 
 The default generated file size is `10 MiB`. The output directory can be
-overridden with the `R2_DEBUG_DIR` environment variable.
+overridden with the `R2_DEBUG_DIR` environment variable, which must resolve to a
+path inside the project (values pointing outside the repository are rejected).
 
 Example:
 

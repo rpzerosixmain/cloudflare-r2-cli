@@ -89,6 +89,55 @@ class CLITest < Minitest::Test
     assert_empty output.string
   end
 
+  def test_help_runs_without_storage_or_credentials
+    out, = capture_io do
+      R2::CLI.start(['help'], storage_factory: -> { raise 'should not build storage' })
+    end
+
+    assert_match(/Commands:/, out)
+    assert_match(/upload PATH/, out)
+  end
+
+  def test_upload_builds_storage_lazily_via_factory
+    calls = 0
+    factory = lambda do
+      calls += 1
+      @storage
+    end
+
+    with_upload(storage_factory: factory)
+
+    assert_equal 1, calls
+    assert_equal File.basename(@last_path), @storage.key
+  end
+
+  def test_upload_raises_when_no_storage_configured
+    Tempfile.create(['example', '.txt']) do |file|
+      file.write('data')
+      file.flush
+
+      assert_raises(R2::Error) do
+        capture_io { R2::CLI.start(['upload', file.path]) }
+      end
+    end
+  end
+
+  def test_upload_rejects_blank_bucket
+    error = assert_raises(R2::UsageError) do
+      with_upload(args: ['--bucket', '  '])
+    end
+
+    assert_match(/bucket must not be blank/, error.message)
+  end
+
+  def test_upload_rejects_blank_key
+    error = assert_raises(R2::UsageError) do
+      with_upload(args: ['--key', '  '])
+    end
+
+    assert_match(/key must not be blank/, error.message)
+  end
+
   private
 
   def build_logger(output)
@@ -97,14 +146,21 @@ class CLITest < Minitest::Test
     logger
   end
 
-  def with_upload(args: [], logger: nil)
+  def with_upload(args: [], logger: nil, storage_factory: nil)
     Tempfile.create(['example', '.txt']) do |file|
       file.write('hello world')
       file.flush
       @last_path = file.path
 
+      config = { logger: logger }
+      if storage_factory
+        config[:storage_factory] = storage_factory
+      else
+        config[:storage] = @storage
+      end
+
       capture_io do
-        R2::CLI.start(['upload', file.path, *args], storage: @storage, logger: logger)
+        R2::CLI.start(['upload', file.path, *args], **config)
       end
     end
   end

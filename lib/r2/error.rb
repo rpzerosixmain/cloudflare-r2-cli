@@ -7,6 +7,9 @@ module R2
   # Raised when required configuration (e.g. environment variables) is missing.
   class ConfigurationError < Error; end
 
+  # Raised when command arguments are invalid.
+  class UsageError < Error; end
+
   # Raised when a local file cannot be read for an operation.
   class FileError < Error; end
 

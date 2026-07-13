@@ -17,10 +17,13 @@ module R2
 
     # Injects dependencies through Thor's config, avoiding global mutable state.
     #
-    # @param config [Hash] may carry :storage and :logger instances
+    # @param config [Hash] may carry :storage, :storage_factory and :logger
+    #   The storage is built lazily from :storage_factory so commands that do
+    #   not touch R2 (e.g. help) work without credentials configured.
     def initialize(args = [], local_options = {}, config = {})
       super
       @storage = config[:storage]
+      @storage_factory = config[:storage_factory]
       @logger = config[:logger] || NullLogger.new
     end
 
@@ -75,11 +78,27 @@ module R2
 
     private
 
-    attr_reader :storage, :logger
+    attr_reader :logger
+
+    # Lazily built storage backend; only credentials-dependent commands need it.
+    #
+    # @raise [R2::Error] when neither a storage instance nor a factory was given
+    def storage
+      @storage ||= build_storage
+    end
+
+    def build_storage
+      raise R2::Error, 'no storage backend configured' unless @storage_factory
+
+      @storage_factory.call
+    end
 
     # Target bucket for the current invocation.
     def bucket
-      options.fetch(:bucket)
+      value = options.fetch(:bucket).to_s.strip
+      raise R2::UsageError, 'bucket must not be blank' if value.empty?
+
+      value
     end
 
     # Adjusts the logger verbosity based on the --verbose flag.
@@ -89,7 +108,13 @@ module R2
 
     # Resolves the destination object key from --key/--prefix or the file name.
     def object_key(path)
-      return options[:key] if options[:key]
+      key = options[:key]
+      if key
+        key = key.to_s.strip
+        raise R2::UsageError, 'key must not be blank' if key.empty?
+
+        return key
+      end
 
       prefix = options[:prefix].to_s.strip.delete_suffix('/')
       base = File.basename(path)

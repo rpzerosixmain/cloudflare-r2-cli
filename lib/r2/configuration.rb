@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'uri'
+
 module R2
   # Holds and validates the settings required to talk to R2.
   #
@@ -19,22 +21,45 @@ module R2
     #
     # @param env [#[], #fetch] source of configuration (defaults to ENV)
     # @return [R2::Configuration]
-    # @raise [R2::ConfigurationError] when a required variable is missing/blank
+    # @raise [R2::ConfigurationError] when required values are invalid
     def self.from_env(env = ENV)
-      missing = REQUIRED_ENV.select { |name| env[name].to_s.strip.empty? }
-
-      unless missing.empty?
-        raise R2::ConfigurationError,
-              "missing required environment variables: #{missing.join(', ')}"
-      end
+      values = required_values(env)
+      endpoint = values.fetch('R2_ENDPOINT')
+      validate_endpoint!(endpoint)
 
       new(
-        access_key_id: env['R2_ACCESS_KEY_ID'],
-        secret_access_key: env['R2_SECRET_ACCESS_KEY'],
-        endpoint: env['R2_ENDPOINT'],
-        region: env.fetch('R2_REGION', DEFAULT_REGION),
+        access_key_id: values.fetch('R2_ACCESS_KEY_ID'),
+        secret_access_key: values.fetch('R2_SECRET_ACCESS_KEY'),
+        endpoint: endpoint,
+        region: region_from(env),
       )
     end
+
+    def self.required_values(env)
+      values = REQUIRED_ENV.to_h { |name| [name, env[name].to_s.strip] }
+      missing = values.select { |_name, value| value.empty? }.keys
+      return values if missing.empty?
+
+      raise R2::ConfigurationError,
+            "missing required environment variables: #{missing.join(', ')}"
+    end
+    private_class_method :required_values
+
+    def self.region_from(env)
+      region = env.fetch('R2_REGION', DEFAULT_REGION).to_s.strip
+      region.empty? ? DEFAULT_REGION : region
+    end
+    private_class_method :region_from
+
+    def self.validate_endpoint!(endpoint)
+      uri = URI.parse(endpoint)
+      return if uri.is_a?(URI::HTTPS) && uri.host
+
+      raise R2::ConfigurationError, 'R2_ENDPOINT must be a valid HTTPS URL'
+    rescue URI::InvalidURIError
+      raise R2::ConfigurationError, 'R2_ENDPOINT must be a valid HTTPS URL'
+    end
+    private_class_method :validate_endpoint!
 
     def initialize(access_key_id:, secret_access_key:, endpoint:, region: DEFAULT_REGION)
       @access_key_id = access_key_id

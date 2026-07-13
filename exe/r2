@@ -1,34 +1,28 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'bundler/setup'
 require 'dotenv/load'
 require 'logger'
 
 require 'r2'
 
-# CLI logger; verbosity is controlled by the --verbose flag inside the CLI.
+# Progress logger; verbosity is controlled by the --verbose flag inside the CLI.
 logger = Logger.new($stdout)
 logger.level = Logger::ERROR
-
-# Simplified format for CLI output
-logger.formatter = proc do |_severity, _datetime, _progname, msg|
-  "[R2] #{msg}\n"
-end
+logger.formatter = proc { |_severity, _datetime, _progname, msg| "[R2] #{msg}\n" }
 
 begin
-  storage = R2::Storage.new(**R2::Configuration.from_env.to_h)
+  # Storage is built lazily so commands like `r2 help` work without credentials.
+  storage_factory = -> { R2::Storage.new(**R2::Configuration.from_env.to_h) }
 
-  # Dependencies are injected per invocation (no global mutable state).
-  R2::CLI.start(ARGV, storage: storage, logger: logger)
+  R2::CLI.start(ARGV, storage_factory: storage_factory, logger: logger)
 rescue R2::Error => e
-  # Expected, user-facing failures: log the message and show it concisely.
-  logger.error(e.message)
+  # Expected, user-facing failures: show a concise message on stderr.
   warn("[R2] #{e.message}")
   exit(1)
 rescue StandardError => e
-  # Unexpected failures: log the full details for debugging.
-  logger.error(e.full_message)
+  # Unexpected failures: concise by default, full trace only when debugging.
   warn("[R2] #{e.message}")
+  warn(e.full_message) if ENV['R2_DEBUG'] == '1'
   exit(1)
 end
