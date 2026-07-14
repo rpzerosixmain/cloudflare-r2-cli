@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = 'CLI for Cloudflare R2'
   spec.description = 'A simple CLI to interact with Cloudflare R2 via an S3-compatible API.'
-  spec.homepage = 'https://github.com/rpzerosixmain/r2'
+  spec.homepage = 'https://github.com/rpzerosixmain/cloudflare-r2-cli'
   spec.license = 'MIT'
 
   spec.required_ruby_version = '>= 3.3'
